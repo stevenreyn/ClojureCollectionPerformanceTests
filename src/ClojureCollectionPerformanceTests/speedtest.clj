@@ -1,10 +1,11 @@
 (ns speedtest)
 
-;;; Caution: does not compile and/or work yet
+;;; Caution: does not work yet
 ;;; Caution: even if it does run, the timing is vastly over estimated
 
 (import 'net.slreynolds.ds.IntMapSource)
 (import 'net.slreynolds.ds.SomeValue)
+(import 'scala.Tuple2) ; TODO probably shouldn't leave this
 
 ; Warmup the jit compiler etc in the JVM
 ; before doing any measurements
@@ -62,10 +63,13 @@
       (print "Times (seconds)")
       (print times))))
         
+(defn create-some-value[#^Integer i]
+  (SomeValue. i))
+
 ; setup implementation for std clojure hashmap
 (defn htsetup[]
   (let [is (range 0 (- (IntMapSource/initialSize) 1))
-        vs (map #(SomeValue. %) is)
+        vs (map create-some-value is)
         themap (hash-map (interleave is vs))]
     themap))
 
@@ -78,7 +82,7 @@
            vs initial-vs] 
       (if (empty vs)
         newmap
-        (recur (assoc newmap (first vs) (rest vs)))))
+        (recur (assoc newmap (first vs)) (rest vs))))))
 
 ; Run the test for std clojure hashmap
 (defn htrun[]

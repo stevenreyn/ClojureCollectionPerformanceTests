@@ -64,7 +64,7 @@
         
 ; setup implementation for std clojure hashmap
 (defn htsetup[]
-  (let [is (range 0 (- IntMapSource/initialSize 1))
+  (let [is (range 0 (- (IntMapSource/initialSize) 1))
         vs (map #(SomeValue. %) is)
         themap (hash-map (interleave is vs))]
     themap))
@@ -73,9 +73,9 @@
 (defn htdowork[themap]
   ; Note doing a lot of extra work here inside the timed function!
   ; Making a list ahead of time is very important!!!!
-  (let [list-of-vs (list IntMapSource/valuesToInsert)]
+  (let [initial-vs (list (IntMapSource/valuesToInsert))]
     (loop [newmap themap
-           vs list-of-vs] 
+           vs initial-vs] 
       (if (empty vs)
         newmap
         (recur (assoc newmap (first vs) (rest vs)))))

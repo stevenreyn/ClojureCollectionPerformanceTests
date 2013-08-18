@@ -80,7 +80,7 @@
            is initial-is]
       (if (empty is)
         newmap
-        (recur (assoc newmap (first is)) (rest is))))))
+        (recur (assoc newmap (first is) (create-some-value (first is))) (rest is))))))
 
 
 ; dowork implementation for std clojure hashmap
@@ -93,7 +93,7 @@
            vs initial-vs] 
       (if (empty vs)
         (Result. newmap 7654321)
-        (recur (assoc newmap (first vs)) (rest vs))))))
+        (recur (assoc newmap (. (first vs) _1) (. (first vs) _2)) (rest vs))))))
 
 ; Run the test for std clojure hashmap
 (defn htrun[]

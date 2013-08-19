@@ -1,7 +1,5 @@
 (ns speedtest)
 
-;;; Caution: does not work yet; space is wrong (zero)
-;;; Caution: the work in the timed function has lots of overhead
 
 (import 'net.slreynolds.ds.IntMapSource)
 (import 'net.slreynolds.ds.SomeValue)
@@ -27,14 +25,19 @@
           (System/gc)
           (System/gc)
           (System/gc)
+          (System/gc)
+          (System/gc)
           (let [runt (Runtime/getRuntime)
                 before (. runt totalMemory)
                 res (dowork o)
                 _ (System/gc)
                 _ (System/gc)
                 _ (System/gc)
+                _ (System/gc)
+                _ (System/gc)
                 after (. runt totalMemory)
                 otherComp (+ computation (. res getIntParam))]
+            (println "otherComp" otherComp)
             (Math/max 0 (- after before)))))
 
    
@@ -57,10 +60,12 @@
 (defn run [setup dowork title]
   (println "runing" title)
   (let [res (warmup setup dowork 20)]
-    (print "res " res)
-    (let [space (measure-space setup dowork)
+    (println "res " res)
+    (let [space1 (measure-space setup dowork)
+          space2 (measure-space setup dowork)
+          space3 (measure-space setup dowork)
           times (timeit setup dowork 5)]
-      (println title "uses" space "bytes")
+      (println title "uses" space1 "," space2 "," space3 "bytes")
       (println "Times (seconds)")
       (println times)
       (println "thanks, all done now"))))
@@ -92,14 +97,13 @@
         
 ; dowork implementation for std clojure hashmap
 (defn htdowork[themap]
-  ; Note doing a lot of extra work here inside the timed function!
-  ; Making a list ahead of time is very important!!!!
-  (let [initial-vs (values-as-list)]
+  (let [valuesAsScalaArray (IntMapSource/valuesToInsert)
+        n (IntMapSource/initialSize)]
     (loop [newmap themap
-           vs initial-vs] 
-      (if (empty? vs)
+           i 0] 
+      (if (>= i n)
         (Result. newmap 7654321)
-        (recur (assoc newmap (. (first vs) _1) (. (first vs) _2)) (rest vs))))))
+        (recur (assoc newmap (. (aget valuesAsScalaArray i) _1) (. (aget valuesAsScalaArray i) _2)) (inc i))))))
 
 ; Run the test for std clojure hashmap
 (defn htrun[]

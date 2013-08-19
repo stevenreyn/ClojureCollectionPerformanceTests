@@ -4,7 +4,7 @@
 (import 'net.slreynolds.ds.IntMapSource)
 (import 'net.slreynolds.ds.SomeValue)
 (import 'net.slreynolds.ds.Result)
-(import 'scala.Tuple2) ; TODO probably shouldn't leave this
+(import 'scala.Tuple2) 
 
 ; Warmup the jit compiler etc in the JVM
 ; before doing any measurements
@@ -84,17 +84,6 @@
         (recur (assoc newmap (first is) (create-some-value (first is))) (rest is))))))
 
 
-; Get the values to insert as a Clojure list
-(defn values-as-list[] 
-  (let [valuesAsScalaArray (IntMapSource/valuesToInsert)
-        n (IntMapSource/initialSize)]
-    (loop [valuesAsList '()
-           i 0]
-      (if (>= i n)
-        valuesAsList
-        (recur (conj valuesAsList (aget valuesAsScalaArray i)) (inc i))))))
-             
-        
 ; dowork implementation for std clojure hashmap
 (defn htdowork[themap]
   (let [valuesAsScalaArray (IntMapSource/valuesToInsert)

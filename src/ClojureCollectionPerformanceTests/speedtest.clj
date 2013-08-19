@@ -1,6 +1,6 @@
 (ns speedtest)
 
-;;; Caution: does not work yet; times are wrong, space is wrong.
+;;; Caution: does not work yet; space is wrong (zero)
 ;;; Caution: the work in the timed function has lots of overhead
 
 (import 'net.slreynolds.ds.IntMapSource)
@@ -11,7 +11,6 @@
 ; Warmup the jit compiler etc in the JVM
 ; before doing any measurements
 (defn warmup[setup dowork N]
-  (println "warming up" N)
   (let [computation 7]
        (dotimes [_ N]
          (let [o (setup)
@@ -23,7 +22,6 @@
 ; Measure space (bytes) consumed by result of
 ; of dowork
 (defn measure-space[setup dowork]
-        (println "measuring space")
         (let [computation 7
               o (setup)]
           (System/gc)
@@ -43,7 +41,6 @@
 ; Do setup and then dowork N times. Record the times taken in dowork.
 ; Return list of times
 (defn timeit[setup dowork N]
-  (println "timeing it")
   (loop [ctr (- N 1)
          times []
          computation 7]
@@ -73,25 +70,34 @@
 
 ; setup implementation for std clojure hashmap
 (defn htsetup[]
-  (println "htsetup")
   (let [initial-is (range 0 (- (IntMapSource/initialSize) 1))
         themap {}]
     (loop [newmap themap
            is initial-is]
-      (if (empty is)
+      (if (empty? is)
         newmap
         (recur (assoc newmap (first is) (create-some-value (first is))) (rest is))))))
 
 
+; Get the values to insert as a Clojure list
+(defn values-as-list[] 
+  (let [valuesAsScalaArray (IntMapSource/valuesToInsert)
+        n (IntMapSource/initialSize)]
+    (loop [valuesAsList '()
+           i 0]
+      (if (>= i n)
+        valuesAsList
+        (recur (conj valuesAsList (aget valuesAsScalaArray i)) (inc i))))))
+             
+        
 ; dowork implementation for std clojure hashmap
 (defn htdowork[themap]
-  (println "htdowork")
   ; Note doing a lot of extra work here inside the timed function!
   ; Making a list ahead of time is very important!!!!
-  (let [initial-vs (list (IntMapSource/valuesToInsert))]
+  (let [initial-vs (values-as-list)]
     (loop [newmap themap
            vs initial-vs] 
-      (if (empty vs)
+      (if (empty? vs)
         (Result. newmap 7654321)
         (recur (assoc newmap (. (first vs) _1) (. (first vs) _2)) (rest vs))))))
 

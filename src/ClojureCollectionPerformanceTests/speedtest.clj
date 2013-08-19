@@ -31,14 +31,14 @@
 ; Measure space (bytes) consumed by result of
 ; of dowork
 (defn measure-space[setup dowork]
-        (let [computation 7
-              o (setup)
-              before (get-memory-used)
-              res (dowork o)
-              after (get-memory-used)
-              otherComp (+ computation (. res getIntParam))]
-            (println "otherComp" otherComp)
-            (Math/max 0 (- after before))))
+  (let [computation 7
+        o (setup)
+        before (get-memory-used)
+        res (dowork o)
+        after (get-memory-used)
+        otherComp (+ computation (. res getIntParam))]
+    (println "otherComp" otherComp)
+    (Math/max 0 (- after before))))
 
    
 ; Do setup and then dowork N times. Record the times taken in dowork.

@@ -6,13 +6,16 @@
 (import 'net.slreynolds.ds.Result)
 (import 'scala.Tuple2) 
 
+; Complain any time reflection is used while compiling
+(set! *warn-on-reflection* true)
+
 ; Warmup the jit compiler etc in the JVM
 ; before doing any measurements
 (defn warmup[setup dowork N]
   (let [computation 7]
        (dotimes [_ N]
          (let [o (setup)
-               res (dowork o)
+               #^Result res (dowork o)
                newComp (+ computation (. res getIntParam))]
            newComp))))
            
@@ -34,11 +37,11 @@
   (let [computation 7
         o (setup)
         before (get-memory-used)
-        res (dowork o)
+        #^Result res (dowork o)
         after (get-memory-used)
         otherComp (+ computation (. res getIntParam))]
     (println "otherComp" otherComp)
-    (Math/max 0 (- after before))))
+    (max 0 (- after before))))
 
    
 ; Do setup and then dowork N times. Record the times taken in dowork.
@@ -49,7 +52,7 @@
          computation 7]
     (let [o (setup)
           before (System/nanoTime)
-          res (dowork o)
+          #^Result res (dowork o)
           after (System/nanoTime)]
       (if (zero? ctr)
         (conj times (* (- after before) 1.E-9))
@@ -59,7 +62,8 @@
 ; Print results
 (defn run [setup dowork title]
   (println "runing" title)
-  (let [res (warmup setup dowork 20)]
+  (get-memory-used)
+  (let [#^Result res (warmup setup dowork 20)]
     (println "res " res)
     (let [space1 (measure-space setup dowork)
           space2 (measure-space setup dowork)
@@ -92,7 +96,7 @@
            i 0] 
       (if (>= i n)
         (Result. newmap 7654321)
-        (recur (assoc newmap (. (aget valuesAsScalaArray i) _1) (. (aget valuesAsScalaArray i) _2)) (inc i))))))
+        (recur (assoc newmap (. #^Tuple2 (aget valuesAsScalaArray i) _1) (.  #^Tuple2 (aget valuesAsScalaArray i) _2)) (inc i))))))
 
 ; Run the test for std clojure hashmap
 (defn htrun[]

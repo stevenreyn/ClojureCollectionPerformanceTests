@@ -19,6 +19,7 @@
                newComp (+ computation (. res getIntParam))]
            newComp))))
            
+; Unreliable and nearly useless
 (defn get-memory-used[]
   (let [runt (Runtime/getRuntime)]
           (System/gc)
@@ -69,7 +70,8 @@
           space2 (measure-space setup dowork)
           space3 (measure-space setup dowork)
           times (timeit setup dowork 5)]
-      (println title "uses" space1 "," space2 "," space3 "bytes")
+      ; Don't print space used, measurements are fairly bogus
+      ;(println title "uses" space1 "," space2 "," space3 "bytes")
       (println "Times (seconds)")
       (println times)
       (println "thanks, all done now"))))

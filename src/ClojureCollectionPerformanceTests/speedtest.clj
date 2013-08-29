@@ -90,8 +90,8 @@
         (recur (assoc newmap (first is) (create-some-value (first is))) (rest is))))))
 
 
-; dowork implementation for std clojure hashmap
-(defn htdowork[themap]
+; dowork implementation for std clojure hashmap -- inserting key,values
+(defn htdoInsertwork[themap]
   (let [valuesAsScalaArray (IntMapSource/valuesToInsert)
         n (IntMapSource/initialSize)]
     (loop [newmap themap
@@ -99,6 +99,17 @@
       (if (>= i n)
         (Result. newmap 7654321)
         (recur (assoc newmap (. #^Tuple2 (aget valuesAsScalaArray i) _1) (.  #^Tuple2 (aget valuesAsScalaArray i) _2)) (inc i))))))
+
+; dowork implementation for std clojure hashmap -- access the map
+(defn htdowork[themap]
+  (let [keysAsScalaArray (IntMapSource/keysToLookUp)
+        n (IntMapSource/initialSize)]
+    (loop [i 0] 
+      (if (>= i n)
+        (Result. themap 7654321)
+        (do
+          (themap (aget keysAsScalaArray i))
+          (recur (inc i)))))))
 
 ; Run the test for std clojure hashmap
 (defn htrun[]
